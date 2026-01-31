@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model IdCounter {
+  prefix String @id
+  counter Int @default(0)
+}
+
+model User {
+  id           String   @id
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+
+  providerProfile  ProviderProfile?
+  customerBookings Booking[] @relation("CustomerBookings")
+  providerBookings Booking[] @relation("ProviderBookings")
+  auditLogs        AuditLog[]
+}
+
+model ProviderProfile {
+  id        String   @id
+  userId    String   @unique
+  bio       String?
+  approved  Boolean  @default(false)
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user         User              @relation(fields: [userId], references: [id])
+  services     ProviderService[]
+  availability Availability[]
+}
+
+model Service {
+  id              String   @id
+  name            String
+  description     String?
+  durationMinutes Int
+  active          Boolean  @default(true)
+  deletedAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  providers ProviderService[]
+  bookings  Booking[]
+}
+
+model ProviderService {
+  id         String @id
+  providerId String
+  serviceId  String
+
+  provider ProviderProfile @relation(fields: [providerId], references: [id])
+  service  Service         @relation(fields: [serviceId], references: [id])
+
+  @@unique([providerId, serviceId])
+}
+
+model Availability {
+  id         String   @id
+  providerId String
+  startAt    DateTime
+  endAt      DateTime
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  provider ProviderProfile @relation(fields: [providerId], references: [id])
+
+  @@index([providerId, startAt])
+}
+
+model Booking {
+  id              String        @id
+  customerId      String
+  providerId      String
+  serviceId       String
+  startAt         DateTime
+  durationMinutes Int
+  status          BookingStatus @default(CONFIRMED)
+  createdAt       DateTime      @default(now())
+
+  customer User    @relation("CustomerBookings", fields: [customerId], references: [id])
+  provider User    @relation("ProviderBookings", fields: [providerId], references: [id])
+  service  Service @relation(fields: [serviceId], references: [id])
+
+  @@unique([providerId, startAt])
+  @@index([providerId, startAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String
+  actorRole Role
+  action    String
+  target    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  actor User @relation(fields: [actorId], references: [id])
+
+  @@index([createdAt])
+  @@index([actorRole])
+}
