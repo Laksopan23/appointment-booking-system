@@ -7,6 +7,7 @@ import { api } from "@/lib/http";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toastSuccess, toastError } from "@/lib/toast";
+import { Leaf, Mail, Lock, AlertCircle, Loader2 } from "lucide-react";
 
 function LoginForm({ nextPath }: { nextPath: string | null }) {
     const router = useRouter();
@@ -14,7 +15,6 @@ function LoginForm({ nextPath }: { nextPath: string | null }) {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState<string | null>(null);
-    const [focused, setFocused] = useState<string | null>(null);
     const [isChecking, setIsChecking] = useState(true);
 
     // Check if user is already authenticated
@@ -45,6 +45,10 @@ function LoginForm({ nextPath }: { nextPath: string | null }) {
             });
 
             toastSuccess("Login successful!");
+
+            // Dispatch auth change event for Navbar to update
+            window.dispatchEvent(new Event("auth-change"));
+
             // Redirect to the "next" path if provided, otherwise use role-based routing
             if (nextPath) {
                 router.push(nextPath);
@@ -63,112 +67,108 @@ function LoginForm({ nextPath }: { nextPath: string | null }) {
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center p-4 sm:p-6 dark:bg-slate-950 bg-white relative overflow-hidden">
+        <main className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-background relative overflow-hidden">
+            {/* Aurora Mint Background Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+
             {/* Show loading state while checking auth */}
             {isChecking && (
-                <div className="fixed inset-0 dark:bg-slate-950/50 bg-white/50 flex items-center justify-center">
-                    <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             )}
 
             {!isChecking && (
-                <>
-                    <form onSubmit={onSubmit} className="relative w-full max-w-md">
-                        <div className="dark:bg-gradient-to-b dark:from-slate-800/50 dark:to-slate-900/50 bg-slate-50 dark:backdrop-blur-xl dark:border dark:border-slate-700/50 border border-slate-200 rounded-2xl p-6 sm:p-8 dark:shadow-2xl shadow-lg">
-                            {/* Header */}
-                            <div className="space-y-2 mb-8">
-                                <div className="flex items-center gap-2 sm:gap-3">
-                                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <span className="text-white font-bold text-sm">A</span>
-                                    </div>
-                                    <h1 className="text-xl sm:text-2xl font-bold dark:text-white text-slate-900">Welcome Back</h1>
+                <form onSubmit={onSubmit} className="relative w-full max-w-md z-10">
+                    <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-lg">
+                        {/* Header */}
+                        <div className="space-y-2 mb-8">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                                    <Leaf className="h-5 w-5 text-primary" />
                                 </div>
-                                <p className="dark:text-slate-400 text-slate-600 text-xs sm:text-sm">Sign in to book your appointments</p>
-                            </div>
-
-                            {/* Email Field */}
-                            <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-                                <label className="text-xs sm:text-sm font-semibold text-slate-200 block">Email Address</label>
-                                <div className="relative group">
-                                    <Input
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        onFocus={() => setFocused('email')}
-                                        onBlur={() => setFocused(null)}
-                                        placeholder="you@example.com"
-                                        type="email"
-                                        required
-                                        className={`w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg dark:bg-slate-800 bg-white dark:border transition-all duration-300 text-sm dark:text-white text-slate-900 placeholder:dark:text-slate-500 placeholder:text-slate-400 ${focused === 'email'
-                                            ? 'border-blue-500 dark:shadow-lg dark:shadow-blue-500/20'
-                                            : 'dark:border-slate-700 border-slate-200 dark:hover:border-slate-600 hover:border-slate-300'
-                                            }`}
-                                    />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 dark:text-slate-400 text-slate-600 text-sm">📧</div>
+                                <div>
+                                    <h1 className="text-xl sm:text-2xl font-bold text-foreground">Welcome Back</h1>
                                 </div>
                             </div>
-
-                            {/* Password Field */}
-                            <div className="space-y-2 sm:space-y-3 mb-2">
-                                <label className="text-xs sm:text-sm font-semibold dark:text-slate-200 text-slate-700 block">Password</label>
-                                <div className="relative group">
-                                    <Input
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        onFocus={() => setFocused('password')}
-                                        onBlur={() => setFocused(null)}
-                                        placeholder="••••••••"
-                                        required
-                                        className={`w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg dark:bg-slate-800 bg-white dark:border transition-all duration-300 text-sm dark:text-white text-slate-900 placeholder:dark:text-slate-500 placeholder:text-slate-400 ${focused === 'password'
-                                            ? 'border-blue-500 dark:bg-slate-700 dark:shadow-lg dark:shadow-blue-500/20'
-                                            : 'dark:border-slate-600 border-slate-200 dark:hover:border-slate-500 hover:border-slate-300'
-                                            }`}
-                                    />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 dark:text-slate-400 text-slate-600 text-sm">🔒</div>
-                                </div>
-                            </div>
-
-                            {/* Forgot Password Link */}
-                            <div className="mb-6 text-right">
-                                <a href="#" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Forgot password?</a>
-                            </div>
-
-                            {/* Error Message */}
-                            {err && (
-                                <div className="mb-6 p-4 rounded-lg bg-red-900/30 border border-red-700/50 animate-slideDown">
-                                    <p className="text-sm text-red-300 flex items-start gap-2">
-                                        <span>⚠️</span>
-                                        <span>{err}</span>
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Submit Button */}
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed mb-4"
-                            >
-                                {loading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Signing in...
-                                    </span>
-                                ) : (
-                                    "Sign In"
-                                )}
-                            </Button>
-
-                            {/* Register Link */}
-                            <p className="text-sm text-slate-400 text-center">
-                                Don't have an account?{" "}
-                                <a href="/auth/register" className="text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-200">
-                                    Create one
-                                </a>
-                            </p>
+                            <p className="text-muted-foreground text-sm">Sign in to book your appointments</p>
                         </div>
-                    </form>
-                </>
+
+                        {/* Email Field */}
+                        <div className="space-y-2 mb-4">
+                            <label className="text-sm font-medium text-foreground block">Email Address</label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="you@example.com"
+                                    type="email"
+                                    required
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Password Field */}
+                        <div className="space-y-2 mb-2">
+                            <label className="text-sm font-medium text-foreground block">Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Forgot Password Link */}
+                        <div className="mb-6 text-right">
+                            <a href="#" className="text-xs text-primary hover:text-primary/80 transition-colors font-medium">
+                                Forgot password?
+                            </a>
+                        </div>
+
+                        {/* Error Message */}
+                        {err && (
+                            <div className="mb-6 p-3 rounded-xl bg-destructive/10 border border-destructive/20">
+                                <p className="text-sm text-destructive flex items-center gap-2">
+                                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                                    <span>{err}</span>
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full mb-4"
+                            size="lg"
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Signing in...
+                                </span>
+                            ) : (
+                                "Sign In"
+                            )}
+                        </Button>
+
+                        {/* Register Link */}
+                        <p className="text-sm text-muted-foreground text-center">
+                            Don&apos;t have an account?{" "}
+                            <a href="/auth/register" className="text-primary hover:text-primary/80 font-semibold transition-colors">
+                                Create one
+                            </a>
+                        </p>
+                    </div>
+                </form>
             )}
         </main>
     );
@@ -176,7 +176,11 @@ function LoginForm({ nextPath }: { nextPath: string | null }) {
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center"><div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" /></div>}>
+        <Suspense fallback={
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        }>
             <LoginPageContent />
         </Suspense>
     );

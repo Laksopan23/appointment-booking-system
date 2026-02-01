@@ -5,7 +5,9 @@ import { api } from "@/lib/http";
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/components/PageShell";
 import { EmptyState } from "@/components/EmptyState";
-import { Calendar } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, Clock, CheckCircle2, XCircle, Loader2, CalendarCheck, History } from "lucide-react";
+import { toastSuccess, toastError } from "@/lib/toast";
 
 type Booking = {
     id: string;
@@ -17,7 +19,6 @@ type Booking = {
 
 export default function ProviderBookingsPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
-    const [msg, setMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [actionId, setActionId] = useState<string | null>(null);
 
@@ -26,8 +27,8 @@ export default function ProviderBookingsPage() {
             setLoading(true);
             const res = await api<{ bookings: Booking[] }>("/api/bookings");
             setBookings(res.bookings);
-        } catch (e: any) {
-            setMsg("Failed to load bookings");
+        } catch (e) {
+            toastError(e, "Failed to load bookings");
         } finally {
             setLoading(false);
         }
@@ -38,17 +39,16 @@ export default function ProviderBookingsPage() {
     }, []);
 
     async function setStatus(id: string, status: "COMPLETED" | "CANCELLED") {
-        setMsg(null);
         try {
             setActionId(id);
             await api(`/api/bookings/${id}/status`, {
                 method: "PATCH",
                 body: JSON.stringify({ status }),
             });
-            setMsg(`✅ Status updated to ${status}`);
+            toastSuccess(`Booking ${status.toLowerCase()}`);
             await load();
-        } catch (e: any) {
-            setMsg("❌ " + (e.message || "Failed"));
+        } catch (e) {
+            toastError(e, "Failed to update status");
         } finally {
             setActionId(null);
         }
@@ -57,55 +57,70 @@ export default function ProviderBookingsPage() {
     const confirmedBookings = bookings.filter((b) => b.status === "CONFIRMED");
     const otherBookings = bookings.filter((b) => b.status !== "CONFIRMED");
 
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case "CONFIRMED":
+                return "badge-warning";
+            case "COMPLETED":
+                return "badge-success";
+            case "CANCELLED":
+                return "badge-destructive";
+            default:
+                return "badge-muted";
+        }
+    };
+
     return (
         <PageShell
             title="Your Bookings"
             description="Manage customer appointments and update their status"
         >
-            <div className="space-y-4 sm:space-y-6">
-
-                {msg && (
-                    <div className={`mb-0 p-3 sm:p-4 rounded-lg text-xs sm:text-sm border ${msg.includes("✅")
-                        ? 'dark:bg-green-900/30 bg-green-50 dark:text-green-300 text-green-700 dark:border-green-700/50 border-green-200'
-                        : 'dark:bg-red-900/30 bg-red-50 dark:text-red-300 text-red-700 dark:border-red-700/50 border-red-200'
-                        }`}>
-                        {msg}
-                    </div>
-                )}
-
-                {loading ? (
-                    <div className="flex justify-center py-12">
-                        <div className="w-12 h-12 border-3 border-green-600/30 border-t-green-600 rounded-full animate-spin" />
-                    </div>
-                ) : bookings.length === 0 ? (
-                    <EmptyState
-                        icon={<Calendar className="w-10 h-10" />}
-                        title="No bookings yet"
-                        description="Customer bookings will appear here once they start booking your services"
-                    />
-                ) : (
-                    <div className="space-y-4 sm:space-y-6">
-                        {/* Confirmed Bookings */}
-                        {confirmedBookings.length > 0 && (
-                            <section>
-                                <h3 className="text-base sm:text-lg font-semibold dark:text-white text-slate-900 mb-3">
-                                    Pending Bookings ({confirmedBookings.length})
-                                </h3>
-                                <div className="space-y-2 sm:space-y-3">
-                                    {confirmedBookings.map((b, idx) => {
-                                        const bookingStart = new Date(b.startAt);
-                                        return <div
+            {loading ? (
+                <div className="flex justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : bookings.length === 0 ? (
+                <EmptyState
+                    icon={<Calendar className="w-10 h-10" />}
+                    title="No bookings yet"
+                    description="Customer bookings will appear here once they start booking your services"
+                />
+            ) : (
+                <div className="space-y-6">
+                    {/* Confirmed Bookings */}
+                    {confirmedBookings.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <CalendarCheck className="h-5 w-5 text-warning" />
+                                    Pending Bookings
+                                    <span className="text-sm font-normal text-muted-foreground">
+                                        ({confirmedBookings.length})
+                                    </span>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {confirmedBookings.map((b) => {
+                                    const bookingStart = new Date(b.startAt);
+                                    return (
+                                        <div
                                             key={b.id}
-                                            className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-3 sm:p-4 hover:dark:border-slate-700 hover:border-slate-300 transition-all border"
+                                            className="bg-surface border border-border rounded-xl p-4 hover:border-primary/30 transition-all"
                                         >
-                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                                 <div className="flex-1 min-w-0">
-                                                    <h3 className="font-semibold dark:text-white text-slate-900 text-sm sm:text-base">{b.service?.name}</h3>
-                                                    <div className="space-y-1 text-xs sm:text-sm dark:text-slate-400 text-slate-600 mt-2">
-                                                        <p>📅 {bookingStart.toDateString()}</p>
-                                                        <p>🕐 {bookingStart.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</p>
-                                                        <span className="inline-block mt-2 px-2 py-1 rounded text-xs font-medium dark:bg-yellow-900/30 bg-yellow-50 dark:text-yellow-300 text-yellow-700">
-                                                            {b.status}
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="font-semibold text-foreground">{b.service?.name}</span>
+                                                        <span className={getStatusBadge(b.status)}>{b.status}</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-2">
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="h-3 w-3" />
+                                                            {bookingStart.toDateString()}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Clock className="h-3 w-3" />
+                                                            {bookingStart.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -114,62 +129,88 @@ export default function ProviderBookingsPage() {
                                                     <Button
                                                         onClick={() => setStatus(b.id, "COMPLETED")}
                                                         disabled={actionId === b.id}
-                                                        className="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs sm:text-sm py-1.5 px-3 rounded transition-colors"
+                                                        variant="success"
+                                                        size="sm"
                                                     >
-                                                        {actionId === b.id ? "..." : "Complete"}
+                                                        {actionId === b.id ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <>
+                                                                <CheckCircle2 className="h-4 w-4 mr-1" />
+                                                                Complete
+                                                            </>
+                                                        )}
                                                     </Button>
                                                     <Button
                                                         onClick={() => setStatus(b.id, "CANCELLED")}
                                                         disabled={actionId === b.id}
-                                                        className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs sm:text-sm py-1.5 px-3 rounded transition-colors"
+                                                        variant="destructive"
+                                                        size="sm"
                                                     >
-                                                        {actionId === b.id ? "..." : "Cancel"}
+                                                        {actionId === b.id ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <>
+                                                                <XCircle className="h-4 w-4 mr-1" />
+                                                                Cancel
+                                                            </>
+                                                        )}
                                                     </Button>
                                                 </div>
                                             </div>
                                         </div>
-                                    })}
-                                </div>
-                            </section>
-                        )}
+                                    );
+                                })}
+                            </CardContent>
+                        </Card>
+                    )}
 
-                        {/* Completed/Cancelled */}
-                        {otherBookings.length > 0 && (
-                            <section>
-                                <h3 className="text-lg font-medium dark:text-slate-400 text-slate-600 mb-3">
-                                    History ({otherBookings.length})
-                                </h3>
-                                <div className="space-y-3">
-                                    {otherBookings.map((b, idx) => {
-                                        const bookingStart = new Date(b.startAt);
-                                        return <div
+                    {/* Completed/Cancelled */}
+                    {otherBookings.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <History className="h-5 w-5 text-muted-foreground" />
+                                    History
+                                    <span className="text-sm font-normal text-muted-foreground">
+                                        ({otherBookings.length})
+                                    </span>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {otherBookings.map((b) => {
+                                    const bookingStart = new Date(b.startAt);
+                                    return (
+                                        <div
                                             key={b.id}
-                                            className="dark:bg-slate-800/50 bg-slate-100/50 dark:border-slate-700/50 border-slate-300/50 rounded-lg p-4 animate-slideUp border"
-                                            style={{ animationDelay: `${0.1 + idx * 0.05}s` }}
+                                            className="bg-surface/50 border border-border/50 rounded-xl p-4"
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div>
-                                                    <h3 className="font-semibold dark:text-slate-300 text-slate-700">{b.service?.name}</h3>
-                                                    <div className="space-y-1 text-sm dark:text-slate-500 text-slate-600 mt-2">
-                                                        <p>📅 {bookingStart.toDateString()}</p>
-                                                        <p>🕐 {bookingStart.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</p>
-                                                        <span className={`inline-block mt-2 px-2 py-1 rounded text-xs font-medium ${b.status === "COMPLETED"
-                                                            ? 'dark:bg-blue-900/30 bg-blue-50 dark:text-blue-300 text-blue-700'
-                                                            : 'dark:bg-red-900/30 bg-red-50 dark:text-red-300 text-red-700'
-                                                            }`}>
-                                                            {b.status}
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="font-semibold text-muted-foreground">{b.service?.name}</span>
+                                                        <span className={getStatusBadge(b.status)}>{b.status}</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-2">
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="h-3 w-3" />
+                                                            {bookingStart.toDateString()}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Clock className="h-3 w-3" />
+                                                            {bookingStart.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    })}
-                                </div>
-                            </section>
-                        )}
-                    </div>
-                )}
-            </div>
+                                    );
+                                })}
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            )}
         </PageShell>
     );
 }

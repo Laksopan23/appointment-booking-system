@@ -6,6 +6,7 @@ import { api } from "@/lib/http";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toastSuccess, toastError } from "@/lib/toast";
+import { Leaf, User, Mail, Lock, ShoppingBag, Star, AlertCircle, Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -15,7 +16,6 @@ export default function RegisterPage() {
     const [role, setRole] = useState<"CUSTOMER" | "PROVIDER">("CUSTOMER");
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState<string | null>(null);
-    const [focused, setFocused] = useState<string | null>(null);
     const [isChecking, setIsChecking] = useState(true);
 
     // Check if user is already authenticated
@@ -56,162 +56,159 @@ export default function RegisterPage() {
         }
     }
 
+    // Progress calculation for step indicator
+    const progress = name && email && password ? 4 : name && email ? 3 : name ? 2 : 1;
+
     return (
-        <main className="min-h-screen flex items-center justify-center p-4 sm:p-6 dark:bg-slate-950 bg-white relative overflow-hidden">
+        <main className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-background relative overflow-hidden">
+            {/* Aurora Mint Background Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+
             {/* Show loading state while checking auth */}
             {isChecking && (
-                <div className="fixed inset-0 dark:bg-slate-950/50 bg-white/50 flex items-center justify-center">
-                    <div className="w-8 h-8 border-3 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+                <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             )}
 
             {!isChecking && (
-                <>
-                    <form onSubmit={onSubmit} className="relative w-full max-w-md">
-                        <div className="dark:bg-slate-900 bg-slate-50 dark:border-slate-800 border-slate-200 rounded-lg p-4 sm:p-6 dark:shadow-xl shadow-lg border">
-                            {/* Header */}
-                            <div className="space-y-2 mb-4 sm:mb-6">
-                                <div className="flex items-center gap-2 sm:gap-3">
-                                    <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <span className="text-white font-bold text-sm">+</span>
-                                    </div>
-                                    <h1 className="text-xl sm:text-2xl font-bold dark:text-white text-slate-900">Join Us</h1>
+                <form onSubmit={onSubmit} className="relative w-full max-w-md z-10">
+                    <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-lg">
+                        {/* Header */}
+                        <div className="space-y-2 mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                                    <Leaf className="h-5 w-5 text-primary" />
                                 </div>
-                                <p className="dark:text-slate-400 text-slate-600 text-sm">Create your account to get started</p>
+                                <div>
+                                    <h1 className="text-xl sm:text-2xl font-bold text-foreground">Join Us</h1>
+                                </div>
                             </div>
+                            <p className="text-muted-foreground text-sm">Create your account to get started</p>
+                        </div>
 
-                            {/* Step Indicator */}
-                            <div className="flex gap-1 mb-8">
-                                {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= (name && email && password ? 3 : name && email ? 2 : name ? 1 : 0)
-                                        ? 'bg-gradient-to-r from-indigo-400 to-indigo-600'
-                                        : 'dark:bg-slate-700 bg-slate-300'
-                                        }`} />
+                        {/* Step Indicator */}
+                        <div className="flex gap-1 mb-6">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div
+                                    key={i}
+                                    className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= progress ? 'bg-primary' : 'bg-muted'
+                                        }`}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Name Field */}
+                        <div className="space-y-2 mb-4">
+                            <label className="text-sm font-medium text-foreground block">Full Name</label>
+                            <div className="relative">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="John Doe"
+                                    required
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Email Field */}
+                        <div className="space-y-2 mb-4">
+                            <label className="text-sm font-medium text-foreground block">Email Address</label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="you@example.com"
+                                    type="email"
+                                    required
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Password Field */}
+                        <div className="space-y-2 mb-4">
+                            <label className="text-sm font-medium text-foreground block">Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Role Selection */}
+                        <div className="space-y-2 mb-6">
+                            <label className="text-sm font-medium text-foreground block">I am a</label>
+                            <div className="grid grid-cols-2 gap-3">
+                                {[
+                                    { value: "CUSTOMER", label: "Customer", Icon: ShoppingBag },
+                                    { value: "PROVIDER", label: "Provider", Icon: Star }
+                                ].map((opt) => (
+                                    <button
+                                        key={opt.value}
+                                        type="button"
+                                        onClick={() => setRole(opt.value as "CUSTOMER" | "PROVIDER")}
+                                        className={`p-4 rounded-xl border-2 transition-all duration-200 ${role === opt.value
+                                                ? 'border-primary bg-primary/10'
+                                                : 'border-border bg-surface hover:border-primary/50'
+                                            }`}
+                                    >
+                                        <opt.Icon className={`h-6 w-6 mx-auto mb-2 ${role === opt.value ? 'text-primary' : 'text-muted-foreground'
+                                            }`} />
+                                        <div className={`text-sm font-semibold ${role === opt.value ? 'text-foreground' : 'text-muted-foreground'
+                                            }`}>
+                                            {opt.label}
+                                        </div>
+                                    </button>
                                 ))}
                             </div>
-
-                            {/* Name Field */}
-                            <div className="space-y-3 mb-6">
-                                <label className="text-sm font-semibold text-slate-200 block">Full Name</label>
-                                <div className="relative">
-                                    <Input
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        onFocus={() => setFocused('name')}
-                                        onBlur={() => setFocused(null)}
-                                        placeholder="John Doe"
-                                        required
-                                        className={`w-full px-4 py-3 rounded-lg bg-slate-700/50 border transition-all duration-300 ${focused === 'name'
-                                            ? 'border-indigo-500 bg-slate-700 shadow-lg shadow-indigo-500/20'
-                                            : 'border-slate-600 hover:border-slate-500'
-                                            } text-white placeholder:text-slate-500`}
-                                    />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">👤</div>
-                                </div>
-                            </div>
-
-                            {/* Email Field */}
-                            <div className="space-y-3 mb-6">
-                                <label className="text-sm font-semibold text-slate-200 block">Email Address</label>
-                                <div className="relative">
-                                    <Input
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        onFocus={() => setFocused('email')}
-                                        onBlur={() => setFocused(null)}
-                                        placeholder="you@example.com"
-                                        type="email"
-                                        required
-                                        className={`w-full px-4 py-3 rounded-lg bg-slate-700/50 border transition-all duration-300 ${focused === 'email'
-                                            ? 'border-indigo-500 bg-slate-700 shadow-lg shadow-indigo-500/20'
-                                            : 'border-slate-600 hover:border-slate-500'
-                                            } text-white placeholder:text-slate-500`}
-                                    />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">📧</div>
-                                </div>
-                            </div>
-
-                            {/* Password Field */}
-                            <div className="space-y-3 mb-6">
-                                <label className="text-sm font-semibold text-slate-200 block">Password</label>
-                                <div className="relative">
-                                    <Input
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        onFocus={() => setFocused('password')}
-                                        onBlur={() => setFocused(null)}
-                                        placeholder="••••••••"
-                                        required
-                                        className={`w-full px-4 py-3 rounded-lg bg-slate-700/50 border transition-all duration-300 ${focused === 'password'
-                                            ? 'border-indigo-500 bg-slate-700 shadow-lg shadow-indigo-500/20'
-                                            : 'border-slate-600 hover:border-slate-500'
-                                            } text-white placeholder:text-slate-500`}
-                                    />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">🔒</div>
-                                </div>
-                            </div>
-
-                            {/* Role Selection */}
-                            <div className="space-y-3 mb-6">
-                                <label className="text-sm font-semibold text-slate-200 block">I am a</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {[
-                                        { value: "CUSTOMER", label: "Customer", icon: "🛍️" },
-                                        { value: "PROVIDER", label: "Provider", icon: "⭐" }
-                                    ].map((opt) => (
-                                        <button
-                                            key={opt.value}
-                                            type="button"
-                                            onClick={() => setRole(opt.value as any)}
-                                            className={`p-3 rounded-lg border-2 transition-all duration-300 transform ${role === opt.value
-                                                ? 'border-indigo-500 bg-indigo-900/30 shadow-lg shadow-indigo-500/20 scale-105'
-                                                : 'border-slate-600 bg-slate-700/30 hover:border-slate-500'
-                                                }`}
-                                        >
-                                            <div className="text-2xl mb-1">{opt.icon}</div>
-                                            <div className="text-sm font-semibold text-white">{opt.label}</div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Error Message */}
-                            {err && (
-                                <div className="mb-6 p-4 rounded-lg bg-red-900/30 border border-red-700/50 animate-slideDown">
-                                    <p className="text-sm text-red-300 flex items-start gap-2">
-                                        <span>⚠️</span>
-                                        <span>{err}</span>
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Submit Button */}
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed mb-4"
-                            >
-                                {loading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Creating account...
-                                    </span>
-                                ) : (
-                                    "Create Account"
-                                )}
-                            </Button>
-
-                            {/* Login Link */}
-                            <p className="text-sm text-slate-400 text-center">
-                                Already have an account?{" "}
-                                <a href="/auth/login" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors duration-200">
-                                    Sign in
-                                </a>
-                            </p>
                         </div>
-                    </form>
-                </>
+
+                        {/* Error Message */}
+                        {err && (
+                            <div className="mb-6 p-3 rounded-xl bg-destructive/10 border border-destructive/20">
+                                <p className="text-sm text-destructive flex items-center gap-2">
+                                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                                    <span>{err}</span>
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full mb-4"
+                            size="lg"
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Creating account...
+                                </span>
+                            ) : (
+                                "Create Account"
+                            )}
+                        </Button>
+
+                        {/* Login Link */}
+                        <p className="text-sm text-muted-foreground text-center">
+                            Already have an account?{" "}
+                            <a href="/auth/login" className="text-primary hover:text-primary/80 font-semibold transition-colors">
+                                Sign in
+                            </a>
+                        </p>
+                    </div>
+                </form>
             )}
         </main>
     );

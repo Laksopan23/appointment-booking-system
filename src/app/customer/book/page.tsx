@@ -5,8 +5,8 @@ import { api } from "@/lib/http";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageShell } from "@/components/PageShell";
-import { EmptyState } from "@/components/EmptyState";
-import { Calendar } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, Clock, User, FileText, CheckCircle2, Loader2, ClipboardList } from "lucide-react";
 import { toastSuccess, toastError } from "@/lib/toast";
 
 type Service = { id: string; name: string; durationMinutes: number };
@@ -21,7 +21,6 @@ export default function CustomerBookPage() {
     const [time, setTime] = useState("");
     const [slots, setSlots] = useState<string[]>([]);
     const [selectedStartAt, setSelectedStartAt] = useState("");
-    const [msg, setMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [initialLoad, setInitialLoad] = useState(true);
     const [currentStep, setCurrentStep] = useState(1);
@@ -35,8 +34,8 @@ export default function CustomerBookPage() {
                 ]);
                 setServices(s.services);
                 setProviders(p.providers);
-            } catch (e: any) {
-                setMsg("Failed to load data");
+            } catch {
+                toastError("Failed to load data");
             } finally {
                 setInitialLoad(false);
             }
@@ -44,11 +43,10 @@ export default function CustomerBookPage() {
     }, []);
 
     async function loadSlots() {
-        setMsg(null);
         setSlots([]);
         setSelectedStartAt("");
         if (!providerProfileId || !serviceId || !date || !time) {
-            setMsg("Select service, provider, date and time first");
+            toastError("Select service, provider, date and time first");
             return;
         }
         try {
@@ -65,17 +63,16 @@ export default function CustomerBookPage() {
             );
             setSlots(res.slots);
             if (res.slots.length === 0) {
-                setMsg("No available slots for this date/time. Try another time.");
+                toastError("No available slots for this date/time. Try another time.");
             }
-        } catch (e: any) {
-            setMsg("Failed to load slots");
+        } catch {
+            toastError("Failed to load slots");
         } finally {
             setLoading(false);
         }
     }
 
     async function book() {
-        setMsg(null);
         if (!selectedStartAt) {
             toastError("Select a time slot");
             return;
@@ -105,101 +102,280 @@ export default function CustomerBookPage() {
             title="Book an Appointment"
             description="Select your preferred service, provider, date and time"
         >
-            <div className="space-y-3 sm:space-y-4">
-                <div className="flex justify-between mb-2 sm:mb-3 gap-1">
+            {/* Progress Indicator */}
+            <div className="mb-6">
+                <div className="flex justify-between mb-3 gap-1">
                     {["Service", "Provider", "Date", "Time", "Confirm"].map((label, i) => (
                         <div key={i} className="text-center flex-1">
-                            <div className={`w-6 sm:w-8 h-6 sm:h-8 rounded-full flex items-center justify-center font-semibold transition-all text-xs sm:text-sm mx-auto ${currentStep > i + 1 ? 'bg-green-600 text-white' : currentStep === i + 1 ? 'bg-blue-600 text-white scale-110' : 'dark:bg-slate-700 bg-slate-300 dark:text-slate-400 text-slate-600'}`}>
-                                {i + 1}
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold transition-all text-sm mx-auto ${currentStep > i + 1
+                                    ? 'bg-success text-success-foreground'
+                                    : currentStep === i + 1
+                                        ? 'bg-primary text-primary-foreground scale-110'
+                                        : 'bg-muted text-muted-foreground'
+                                }`}>
+                                {currentStep > i + 1 ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
                             </div>
-                            <p className="text-xs dark:text-slate-400 text-slate-600 mt-1 hidden sm:block">{label}</p>
+                            <p className="text-xs text-muted-foreground mt-1 hidden sm:block">{label}</p>
                         </div>
                     ))}
                 </div>
-                <div className="w-full h-1 dark:bg-slate-700 bg-slate-300 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-600 transition-all duration-500 rounded-full" style={{ width: `${(currentStep / 5) * 100}%` }} />
+                <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-primary transition-all duration-500 rounded-full"
+                        style={{ width: `${(currentStep / 5) * 100}%` }}
+                    />
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-4">
                     {initialLoad ? (
-                        <div className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-6 sm:p-8 text-center border">
-                            <div className="flex justify-center mb-4">
-                                <div className="w-12 h-12 border-3 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
-                            </div>
-                            <p className="dark:text-slate-300 text-slate-700 text-sm sm:text-base">Loading services...</p>
-                        </div>
+                        <Card>
+                            <CardContent className="py-12 text-center">
+                                <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
+                                <p className="text-muted-foreground">Loading services...</p>
+                            </CardContent>
+                        </Card>
                     ) : (
                         <>
-                            <div className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-4 sm:p-6 border">
-                                <label className="text-xs sm:text-sm font-semibold dark:text-white text-slate-900 mb-3 sm:mb-4 flex items-center gap-2">
-                                    <span className="text-lg">📋</span>
-                                    Select Service
-                                </label>
-                                <select className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg dark:bg-slate-800 bg-slate-100 dark:border-slate-700 border-slate-300 dark:text-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm border" value={serviceId} onChange={(e) => { setServiceId(e.target.value); setCurrentStep(1); setSlots([]); setSelectedStartAt(""); setDate(""); setTime(""); }}>
-                                    <option value="">-- Choose --</option>
-                                    {services.map((s) => <option key={s.id} value={s.id}>{s.name} • {s.durationMinutes}min</option>)}
-                                </select>
-                                {selectedService && <div className="mt-3 p-2 sm:p-3 dark:bg-blue-900/30 bg-blue-50 dark:border-blue-700/50 border-blue-200 rounded-lg border"><p className="text-xs sm:text-sm dark:text-blue-300 text-blue-700">✓ {selectedService.name}</p></div>}
-                            </div>
+                            {/* Service Selection */}
+                            <Card>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="flex items-center gap-2 text-base">
+                                        <FileText className="h-4 w-4 text-primary" />
+                                        Select Service
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <select
+                                        className="w-full px-4 py-3 rounded-xl bg-surface border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                        value={serviceId}
+                                        onChange={(e) => {
+                                            setServiceId(e.target.value);
+                                            setCurrentStep(1);
+                                            setSlots([]);
+                                            setSelectedStartAt("");
+                                            setDate("");
+                                            setTime("");
+                                        }}
+                                    >
+                                        <option value="">-- Choose a service --</option>
+                                        {services.map((s) => (
+                                            <option key={s.id} value={s.id}>{s.name} • {s.durationMinutes} min</option>
+                                        ))}
+                                    </select>
+                                    {selectedService && (
+                                        <div className="mt-3 p-3 bg-primary/10 border border-primary/20 rounded-xl">
+                                            <p className="text-sm text-primary flex items-center gap-2">
+                                                <CheckCircle2 className="h-4 w-4" />
+                                                {selectedService.name} ({selectedService.durationMinutes} min)
+                                            </p>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
 
-                            {serviceId && <div className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-4 sm:p-6 border">
-                                <label className="text-xs sm:text-sm font-semibold dark:text-white text-slate-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="text-lg">👤</span>Select Provider</label>
-                                <select className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg dark:bg-slate-800 bg-slate-100 dark:border-slate-700 border-slate-300 dark:text-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm border" value={providerProfileId} onChange={(e) => { setProviderProfileId(e.target.value); setCurrentStep(2); setSlots([]); setSelectedStartAt(""); setDate(""); setTime(""); }}>
-                                    <option value="">-- Choose --</option>
-                                    {providers.map((p) => <option key={p.providerProfileId} value={p.providerProfileId}>{p.name}</option>)}
-                                </select>
-                                {selectedProvider && <div className="mt-3 space-y-2"><div className="p-2 sm:p-3 dark:bg-blue-900/30 bg-blue-50 dark:border-blue-700/50 border-blue-200 rounded-lg border"><p className="text-xs sm:text-sm dark:text-blue-300 text-blue-700">✓ {selectedProvider.name}</p></div>{selectedProvider.bio && <p className="text-xs sm:text-sm dark:text-slate-400 text-slate-600">{selectedProvider.bio}</p>}</div>}
-                            </div>}
+                            {/* Provider Selection */}
+                            {serviceId && (
+                                <Card>
+                                    <CardHeader className="pb-3">
+                                        <CardTitle className="flex items-center gap-2 text-base">
+                                            <User className="h-4 w-4 text-primary" />
+                                            Select Provider
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <select
+                                            className="w-full px-4 py-3 rounded-xl bg-surface border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                            value={providerProfileId}
+                                            onChange={(e) => {
+                                                setProviderProfileId(e.target.value);
+                                                setCurrentStep(2);
+                                                setSlots([]);
+                                                setSelectedStartAt("");
+                                                setDate("");
+                                                setTime("");
+                                            }}
+                                        >
+                                            <option value="">-- Choose a provider --</option>
+                                            {providers.map((p) => (
+                                                <option key={p.providerProfileId} value={p.providerProfileId}>{p.name}</option>
+                                            ))}
+                                        </select>
+                                        {selectedProvider && (
+                                            <div className="mt-3 space-y-2">
+                                                <div className="p-3 bg-primary/10 border border-primary/20 rounded-xl">
+                                                    <p className="text-sm text-primary flex items-center gap-2">
+                                                        <CheckCircle2 className="h-4 w-4" />
+                                                        {selectedProvider.name}
+                                                    </p>
+                                                </div>
+                                                {selectedProvider.bio && (
+                                                    <p className="text-sm text-muted-foreground">{selectedProvider.bio}</p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            )}
 
-                            {serviceId && providerProfileId && <div className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-4 sm:p-6 border">
-                                <label className="text-xs sm:text-sm font-semibold dark:text-white text-slate-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="text-lg">📅</span>Select Date</label>
-                                <Input type="date" value={date} onChange={(e) => { setDate(e.target.value); setCurrentStep(3); setSlots([]); setSelectedStartAt(""); setTime(""); }} min={new Date().toISOString().split("T")[0]} className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg dark:bg-slate-800 bg-slate-100 dark:border-slate-700 border-slate-300 dark:text-white text-slate-900 text-sm border" />
-                            </div>}
+                            {/* Date Selection */}
+                            {serviceId && providerProfileId && (
+                                <Card>
+                                    <CardHeader className="pb-3">
+                                        <CardTitle className="flex items-center gap-2 text-base">
+                                            <Calendar className="h-4 w-4 text-primary" />
+                                            Select Date
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Input
+                                            type="date"
+                                            value={date}
+                                            onChange={(e) => {
+                                                setDate(e.target.value);
+                                                setCurrentStep(3);
+                                                setSlots([]);
+                                                setSelectedStartAt("");
+                                                setTime("");
+                                            }}
+                                            min={new Date().toISOString().split("T")[0]}
+                                        />
+                                    </CardContent>
+                                </Card>
+                            )}
 
-                            {serviceId && providerProfileId && date && <div className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-4 sm:p-6 border">
-                                <label className="text-xs sm:text-sm font-semibold dark:text-white text-slate-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="text-lg">⏰</span>Select Time</label>
-                                <Input type="time" value={time} onChange={(e) => { setTime(e.target.value); setCurrentStep(4); setSlots([]); setSelectedStartAt(""); }} className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg dark:bg-slate-800 bg-slate-100 dark:border-slate-700 border-slate-300 dark:text-white text-slate-900 text-sm border" />
-                            </div>}
+                            {/* Time Selection */}
+                            {serviceId && providerProfileId && date && (
+                                <Card>
+                                    <CardHeader className="pb-3">
+                                        <CardTitle className="flex items-center gap-2 text-base">
+                                            <Clock className="h-4 w-4 text-primary" />
+                                            Select Time
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Input
+                                            type="time"
+                                            value={time}
+                                            onChange={(e) => {
+                                                setTime(e.target.value);
+                                                setCurrentStep(4);
+                                                setSlots([]);
+                                                setSelectedStartAt("");
+                                            }}
+                                        />
+                                    </CardContent>
+                                </Card>
+                            )}
 
-                            {serviceId && providerProfileId && date && time && <Button onClick={loadSlots} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 sm:py-3 rounded-lg transition-colors disabled:opacity-70 text-sm">
-                                {loading ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Loading times...</span> : "View Available Slots"}
-                            </Button>}
+                            {/* Load Slots Button */}
+                            {serviceId && providerProfileId && date && time && (
+                                <Button onClick={loadSlots} disabled={loading} className="w-full" size="lg">
+                                    {loading ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                            Loading times...
+                                        </>
+                                    ) : (
+                                        "View Available Slots"
+                                    )}
+                                </Button>
+                            )}
+
+                            {/* Available Slots */}
+                            {slots.length > 0 && (
+                                <Card>
+                                    <CardHeader className="pb-3">
+                                        <CardTitle className="flex items-center gap-2 text-base">
+                                            <CheckCircle2 className="h-4 w-4 text-success" />
+                                            Available Slots
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mb-4">
+                                            {slots.map((slot) => {
+                                                const slotDate = new Date(slot);
+                                                const slotTime = slotDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+                                                return (
+                                                    <button
+                                                        key={slot}
+                                                        onClick={() => setSelectedStartAt(slot)}
+                                                        className={`p-3 rounded-xl border-2 font-semibold transition-all text-sm ${selectedStartAt === slot
+                                                                ? 'border-primary bg-primary text-primary-foreground'
+                                                                : 'border-border bg-surface text-foreground hover:border-primary/50'
+                                                            }`}
+                                                    >
+                                                        {slotTime}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        <Button
+                                            onClick={book}
+                                            disabled={!selectedStartAt || loading}
+                                            variant="success"
+                                            className="w-full"
+                                            size="lg"
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                                    Booking...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                                                    Confirm Booking
+                                                </>
+                                            )}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            )}
                         </>
                     )}
-
-                    {slots.length > 0 && <div className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-4 sm:p-6 border">
-                        <label className="text-xs sm:text-sm font-semibold dark:text-white text-slate-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="text-lg">✓</span>Confirmed Slots</label>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mb-4 sm:mb-6">
-                            {slots.map((slot, idx) => {
-                                const slotDate = new Date(slot);
-                                const slotTime = slotDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-                                return <button key={slot} onClick={() => setSelectedStartAt(slot)} className={`p-2 sm:p-3 rounded-lg border-2 font-semibold transition-all duration-300 text-xs sm:text-sm ${selectedStartAt === slot ? 'border-blue-500 bg-blue-600 text-white shadow-lg shadow-blue-600/50' : 'dark:border-slate-600 border-slate-300 dark:bg-slate-800 bg-slate-100 dark:text-slate-200 text-slate-700 hover:dark:border-blue-500 hover:border-blue-500'}`}>{slotTime}</button>;
-                            })}
-                        </div>
-                        <Button onClick={book} disabled={!selectedStartAt || loading} className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 sm:py-3 rounded-lg transition-colors text-sm">
-                            {loading ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Booking...</span> : "Confirm"}
-                        </Button>
-                    </div>}
                 </div>
 
+                {/* Summary Sidebar */}
                 <div className="lg:col-span-1">
                     <div className="sticky top-6">
-                        <div className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-4 sm:p-6 space-y-3 sm:space-y-4 border">
-                            <h3 className="text-base sm:text-lg font-semibold dark:text-white text-slate-900">📝 Summary</h3>
-                            <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-                                <div><p className="dark:text-slate-400 text-slate-600">Service</p><p className="dark:text-white text-slate-900 font-semibold text-sm">{selectedService?.name || "—"}</p></div>
-                                {selectedService && <div><p className="dark:text-slate-400 text-slate-600">Duration</p><p className="dark:text-white text-slate-900 font-semibold text-sm">{selectedService.durationMinutes} min</p></div>}
-                                <div><p className="dark:text-slate-400 text-slate-600">Provider</p><p className="dark:text-white text-slate-900 font-semibold text-sm">{selectedProvider?.name || "—"}</p></div>
-                                <div><p className="dark:text-slate-400 text-slate-600">Date</p><p className="dark:text-white text-slate-900 font-semibold text-sm">{date ? new Date(date).toLocaleDateString() : "—"}</p></div>
-                                <div><p className="dark:text-slate-400 text-slate-600">Time</p><p className="dark:text-white text-slate-900 font-semibold text-sm">{selectedStartAt ? new Date(selectedStartAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "—"}</p></div>
-                            </div>
-                        </div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <ClipboardList className="h-5 w-5 text-primary" />
+                                    Summary
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Service</p>
+                                    <p className="text-sm font-semibold text-foreground">{selectedService?.name || "—"}</p>
+                                </div>
+                                {selectedService && (
+                                    <div>
+                                        <p className="text-xs text-muted-foreground uppercase tracking-wide">Duration</p>
+                                        <p className="text-sm font-semibold text-foreground">{selectedService.durationMinutes} min</p>
+                                    </div>
+                                )}
+                                <div>
+                                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Provider</p>
+                                    <p className="text-sm font-semibold text-foreground">{selectedProvider?.name || "—"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Date</p>
+                                    <p className="text-sm font-semibold text-foreground">{date ? new Date(date).toLocaleDateString() : "—"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Time</p>
+                                    <p className="text-sm font-semibold text-foreground">
+                                        {selectedStartAt ? new Date(selectedStartAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
-
-                {msg && <div className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md p-3 sm:p-4 rounded-lg border text-xs sm:text-sm ${msg.includes("✅") ? 'dark:bg-green-900/30 bg-green-50 dark:text-green-300 text-green-700 dark:border-green-700/50 border-green-200' : 'dark:bg-amber-900/30 bg-amber-50 dark:text-amber-300 text-amber-700 dark:border-amber-700/50 border-amber-200'}`}><p className="font-semibold">{msg}</p></div>}
             </div>
         </PageShell>
     );

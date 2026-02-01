@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageShell } from "@/components/PageShell";
 import { EmptyState } from "@/components/EmptyState";
-import { Calendar } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, Clock, Plus, Loader2 } from "lucide-react";
 import { toastSuccess, toastError } from "@/lib/toast";
 
 type ProviderMe = {
@@ -37,7 +38,6 @@ export default function ProviderAvailabilityPage() {
     const [startTime, setStartTime] = useState("09:00");
     const [endTime, setEndTime] = useState("12:00");
     const [blocks, setBlocks] = useState<AvailabilityBlock[]>([]);
-    const [msg, setMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     async function loadMeAndProfile() {
@@ -49,13 +49,12 @@ export default function ProviderAvailabilityPage() {
             const p = await api<{ providers: ProviderItem[] }>("/api/providers");
             const mine = p.providers.find((x) => x.userId === res.user!.id);
             if (mine) setProviderProfileId(mine.providerProfileId);
-        } catch (e) {
-            setMsg("Failed to load profile");
+        } catch {
+            toastError("Failed to load profile");
         }
     }
 
     async function loadBlocks(d: string) {
-        setMsg(null);
         if (!providerProfileId || !d) return;
         try {
             // Calculate startAt range for the day (00:00 to 23:59)
@@ -67,8 +66,8 @@ export default function ProviderAvailabilityPage() {
                 `/api/availability?providerId=${providerProfileId}&startAt=${encodeURIComponent(startOfDay)}&endAt=${encodeURIComponent(endOfDay)}`
             );
             setBlocks(res.blocks);
-        } catch (e: any) {
-            setMsg("Failed to load blocks");
+        } catch {
+            toastError("Failed to load blocks");
         }
     }
 
@@ -83,7 +82,6 @@ export default function ProviderAvailabilityPage() {
     }, [date, providerProfileId]);
 
     async function createAvailability() {
-        setMsg(null);
         try {
             setLoading(true);
             // Construct startAt and endAt ISO datetime strings
@@ -109,10 +107,13 @@ export default function ProviderAvailabilityPage() {
 
     if (!me) {
         return (
-            <main className="min-h-screen p-4 sm:p-6 dark:bg-slate-950 bg-white flex items-center justify-center">
-                <div className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-6 sm:p-8 text-center border">
-                    <p className="dark:text-slate-400 text-slate-600 text-sm sm:text-base">Please login as a provider</p>
-                </div>
+            <main className="min-h-screen p-4 sm:p-6 bg-background flex items-center justify-center">
+                <Card className="max-w-md">
+                    <CardContent className="py-8 text-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+                        <p className="text-muted-foreground">Loading your profile...</p>
+                    </CardContent>
+                </Card>
             </main>
         );
     }
@@ -122,111 +123,112 @@ export default function ProviderAvailabilityPage() {
             title="My Availability"
             description="Set your working hours and availability blocks"
         >
-            <div className="space-y-4 sm:space-y-6">
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                    {/* Create Block Form */}
-                    <section className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-4 sm:p-6 border">
-                        <h3 className="text-base sm:text-lg font-semibold dark:text-white text-slate-900 mb-3 sm:mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Create Block Form */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Plus className="h-5 w-5 text-primary" />
                             Create Availability Block
-                        </h3>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <label className="text-sm font-medium text-foreground block mb-2">Date</label>
+                            <Input
+                                type="date"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
+                                min={new Date().toISOString().split("T")[0]}
+                            />
+                        </div>
 
-                        <div className="space-y-3 sm:space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="text-xs sm:text-sm font-semibold dark:text-slate-200 text-slate-700 block mb-2">Date</label>
+                                <label className="text-sm font-medium text-foreground block mb-2">Start Time</label>
                                 <Input
-                                    type="date"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                    min={new Date().toISOString().split("T")[0]}
-                                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg dark:bg-slate-800 bg-slate-100 dark:border-slate-700 border-slate-300 dark:text-white text-slate-900 text-sm border"
+                                    type="time"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                                <div>
-                                    <label className="text-xs sm:text-sm font-semibold dark:text-slate-200 text-slate-700 block mb-2">Start Time</label>
-                                    <Input
-                                        type="time"
-                                        value={startTime}
-                                        onChange={(e) => setStartTime(e.target.value)}
-                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg dark:bg-slate-800 bg-slate-100 dark:border-slate-700 border-slate-300 dark:text-white text-slate-900 text-sm border"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="text-xs sm:text-sm font-semibold dark:text-slate-200 text-slate-700 block mb-2">End Time</label>
-                                    <Input
-                                        type="time"
-                                        value={endTime}
-                                        onChange={(e) => setEndTime(e.target.value)}
-                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg dark:bg-slate-800 bg-slate-100 dark:border-slate-700 border-slate-300 dark:text-white text-slate-900 text-sm border"
-                                    />
-                                </div>
+                            <div>
+                                <label className="text-sm font-medium text-foreground block mb-2">End Time</label>
+                                <Input
+                                    type="time"
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
+                                />
                             </div>
-
-                            <Button
-                                onClick={createAvailability}
-                                disabled={!date || !providerProfileId || loading}
-                                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 sm:py-3 rounded-lg transition-colors disabled:opacity-70 text-sm"
-                            >
-                                {loading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Creating...
-                                    </span>
-                                ) : (
-                                    "Create Block"
-                                )}
-                            </Button>
-
-                            {msg && (
-                                <div className={`p-3 sm:p-4 rounded-lg text-xs sm:text-sm border ${msg.includes("✅")
-                                    ? 'dark:bg-green-900/30 bg-green-50 dark:text-green-300 text-green-700 dark:border-green-700/50 border-green-200'
-                                    : 'dark:bg-red-900/30 bg-red-50 dark:text-red-300 text-red-700 dark:border-red-700/50 border-red-200'
-                                    }`}>
-                                    {msg}
-                                </div>
-                            )}
                         </div>
-                    </section>
 
-                    {/* Available Blocks */}
-                    <section className="dark:bg-slate-900 bg-white dark:border-slate-800 border-slate-200 rounded-lg p-4 sm:p-6 border">
-                        <h3 className="text-base sm:text-lg font-semibold dark:text-white text-slate-900 mb-3 sm:mb-4">
+                        <Button
+                            onClick={createAvailability}
+                            disabled={!date || !providerProfileId || loading}
+                            className="w-full"
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    Creating...
+                                </>
+                            ) : (
+                                <>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Create Block
+                                </>
+                            )}
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                {/* Available Blocks */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Calendar className="h-5 w-5 text-primary" />
                             Your Availability Blocks
-                        </h3>
-
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
                         {!date ? (
-                            <div className="text-center py-8">
-                                <p className="dark:text-slate-400 text-slate-600">Pick a date above to see availability blocks</p>
-                            </div>
+                            <EmptyState
+                                icon={<Calendar className="w-10 h-10" />}
+                                title="Select a date"
+                                description="Pick a date above to see availability blocks"
+                            />
                         ) : blocks.length === 0 ? (
-                            <div className="text-center py-8">
-                                <p className="dark:text-slate-400 text-slate-600">No availability blocks for this date</p>
-                            </div>
+                            <EmptyState
+                                icon={<Clock className="w-10 h-10" />}
+                                title="No availability blocks"
+                                description="Create your first availability block for this date"
+                            />
                         ) : (
                             <div className="space-y-3">
-                                {blocks.map((b, idx) => {
+                                {blocks.map((b) => {
                                     const startAtDate = new Date(b.startAt);
                                     const endAtDate = new Date(b.endAt);
                                     const startTimeStr = startAtDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
                                     const endTimeStr = endAtDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
                                     return (
-                                        <div key={b.id} className="p-4 dark:bg-slate-700/30 bg-slate-100 dark:border-slate-600 border-slate-300 rounded-lg hover:dark:border-purple-500/50 hover:border-purple-300 transition-all animate-slideUp border" style={{ animationDelay: `${idx * 0.05}s` }}>
+                                        <div
+                                            key={b.id}
+                                            className="p-4 bg-surface border border-border rounded-xl hover:border-primary/30 transition-all"
+                                        >
                                             <div className="flex items-start justify-between">
                                                 <div>
-                                                    <div className="font-semibold dark:text-white text-slate-900">
-                                                        {startTimeStr} - {endTimeStr}
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="h-4 w-4 text-primary" />
+                                                        <span className="font-semibold text-foreground">
+                                                            {startTimeStr} - {endTimeStr}
+                                                        </span>
                                                     </div>
-                                                    <div className="text-sm dark:text-slate-400 text-slate-600 mt-1">
+                                                    <p className="text-sm text-muted-foreground mt-1">
                                                         {startAtDate.toDateString()}
-                                                    </div>
+                                                    </p>
                                                 </div>
-                                                <span className={`px-2 py-1 rounded text-xs font-semibold ${b.active
-                                                    ? 'dark:bg-green-900/30 bg-green-50 dark:text-green-300 text-green-700'
-                                                    : 'dark:bg-slate-700 bg-slate-200 dark:text-slate-400 text-slate-600'
-                                                    }`}>
+                                                <span className={b.active ? 'badge-success' : 'badge-muted'}>
                                                     {b.active ? "Active" : "Inactive"}
                                                 </span>
                                             </div>
@@ -235,8 +237,8 @@ export default function ProviderAvailabilityPage() {
                                 })}
                             </div>
                         )}
-                    </section>
-                </div>
+                    </CardContent>
+                </Card>
             </div>
         </PageShell>
     );

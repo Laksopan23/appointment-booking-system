@@ -3,8 +3,19 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/lib/http";
-import { Calendar, Users, Briefcase, Shield, ArrowRight } from "lucide-react";
+import {
+  Calendar,
+  Users,
+  Briefcase,
+  Shield,
+  ArrowRight,
+  Leaf,
+  Clock,
+  CheckCircle2,
+  Sparkles
+} from "lucide-react";
 
 type Me =
   | { id: string; name: string; role: "CUSTOMER" | "PROVIDER" | "ADMIN" }
@@ -30,99 +41,229 @@ export default function HomePage() {
   const dashboard = useMemo(() => {
     if (!me) return null;
     if (me.role === "CUSTOMER")
-      return { href: "/customer/book", label: "Go to Booking" };
+      return { href: "/customer/book", label: "Book an Appointment" };
     if (me.role === "PROVIDER")
-      return { href: "/provider/availability", label: "Go to Provider Dashboard" };
-    return { href: "/admin/services", label: "Go to Admin Dashboard" };
+      return { href: "/provider/availability", label: "Manage Availability" };
+    return { href: "/admin/services", label: "Go to Dashboard" };
   }, [me]);
 
   return (
-    <main className="min-h-[calc(100vh-64px)] p-4 sm:p-6 lg:p-8 dark:bg-slate-950 bg-white">
-      <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
-        {/* Hero Section */}
-        <div className="space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-6 sm:w-7 h-6 sm:h-7 text-white" />
+    <main className="min-h-[calc(100vh-64px)] bg-background">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="text-center space-y-6">
+            {/* Logo */}
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
+              <Leaf className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">BookMe</h1>
+
+            {/* Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
+              Book Appointments
+              <span className="block text-primary">Effortlessly</span>
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+              A modern scheduling platform for customers, providers, and administrators.
+              Simple, fast, and beautifully designed.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+              {loading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  Loading...
+                </div>
+              ) : me && dashboard ? (
+                <div className="flex flex-col items-center gap-4">
+                  <p className="text-muted-foreground">
+                    Welcome back, <span className="font-medium text-foreground">{me.name}</span>
+                  </p>
+                  <Button asChild size="lg" className="gap-2">
+                    <Link href={dashboard.href}>
+                      {dashboard.label}
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Button asChild size="lg" className="gap-2">
+                    <Link href="/auth/register">
+                      Get Started Free
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg">
+                    <Link href="/auth/login">Sign In</Link>
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
-          <p className="text-slate-300 text-sm sm:text-base lg:text-lg max-w-2xl leading-relaxed">
-            Book appointments easily. Providers manage availability. Admins control the system.
-          </p>
         </div>
+      </section>
 
-        {/* Feature Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 sm:p-6 hover:border-blue-500/50 transition-all group">
-            <div className="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-blue-600/30 transition-colors">
-              <Users className="w-5 sm:w-6 h-5 sm:h-6 text-blue-400" />
-            </div>
-            <h3 className="font-semibold text-white text-sm sm:text-base mb-2">Customers</h3>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Browse services, view time slots, book and cancel appointments.
+      {/* Features Section */}
+      <section className="py-16 sm:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+              Built for Everyone
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Whether you&apos;re booking appointments, managing your schedule, or overseeing operations.
             </p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 sm:p-6 hover:border-purple-500/50 transition-all group">
-            <div className="w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-purple-600/30 transition-colors">
-              <Briefcase className="w-5 sm:w-6 h-5 sm:h-6 text-purple-400" />
-            </div>
-            <h3 className="font-semibold text-white text-sm sm:text-base mb-2">Providers</h3>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Create availability, manage bookings, mark sessions completed.
-            </p>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 sm:p-6 hover:border-green-500/50 transition-all group sm:col-span-2 lg:col-span-1">
-            <div className="w-10 h-10 bg-green-600/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-green-600/30 transition-colors">
-              <Shield className="w-5 sm:w-6 h-5 sm:h-6 text-green-400" />
-            </div>
-            <h3 className="font-semibold text-white mb-2">Admins</h3>
-            <p className="text-sm text-slate-400">
-              Manage services, approve providers, monitor the system.
-            </p>
-          </div>
-        </div>
-
-        {/* CTA Section */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 sm:p-6 lg:p-8 text-center">
-          {loading ? (
-            <div className="flex justify-center">
-              <div className="w-8 h-8 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
-            </div>
-          ) : me && dashboard ? (
-            <div className="space-y-3 sm:space-y-4">
-              <div>
-                <p className="text-sm sm:text-base text-slate-300 mb-1">You are logged in as</p>
-                <p className="text-base sm:text-lg lg:text-xl font-bold text-blue-400">
-                  {me.name} <span className="text-slate-400">({me.role})</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Customer Card */}
+            <Card className="group hover:border-primary/30 hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">For Customers</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Browse services, view available time slots, and book appointments in seconds.
                 </p>
-              </div>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Easy booking flow
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    View & manage bookings
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Cancel anytime
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
 
-              <Button asChild className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 sm:py-3 px-6 sm:px-8 rounded transition-colors">
-                <Link href={dashboard.href}>{dashboard.label}</Link>
-              </Button>
+            {/* Provider Card */}
+            <Card className="group hover:border-accent/30 hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+                  <Briefcase className="w-6 h-6 text-accent" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">For Providers</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Set your availability, manage appointments, and grow your business.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Flexible scheduling
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Booking management
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Track completions
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
 
-              <p className="text-xs sm:text-sm text-slate-400 flex items-center justify-center gap-2">
-                <ArrowRight className="w-3 h-3" /> Tip: use the navbar above to navigate quickly
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3 sm:space-y-4">
-              <p className="text-sm sm:text-base text-slate-300">Get started now</p>
-              <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3">
-                <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 sm:py-2.5 px-6 sm:px-8 rounded transition-colors">
-                  <Link href="/auth/login">Login</Link>
-                </Button>
-                <Button asChild className="border border-slate-600 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-500 font-semibold py-2 sm:py-2.5 px-6 sm:px-8 rounded transition-all">
-                  <Link href="/auth/register">Register</Link>
-                </Button>
+            {/* Admin Card */}
+            <Card className="group hover:border-success/30 hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center mb-4 group-hover:bg-success/20 transition-colors">
+                  <Shield className="w-6 h-6 text-success" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">For Admins</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Full control over services, providers, and system monitoring.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Service management
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Provider approvals
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Audit logs
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-card border-y border-border">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mx-auto mb-3">
+                <Calendar className="w-6 h-6 text-primary" />
               </div>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">Easy</p>
+              <p className="text-sm text-muted-foreground">Booking</p>
             </div>
+            <div>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 mx-auto mb-3">
+                <Clock className="w-6 h-6 text-accent" />
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">Fast</p>
+              <p className="text-sm text-muted-foreground">Scheduling</p>
+            </div>
+            <div>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-success/10 mx-auto mb-3">
+                <Shield className="w-6 h-6 text-success" />
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">Secure</p>
+              <p className="text-sm text-muted-foreground">Platform</p>
+            </div>
+            <div>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-warning/10 mx-auto mb-3">
+                <Sparkles className="w-6 h-6 text-warning" />
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">Modern</p>
+              <p className="text-sm text-muted-foreground">Design</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer CTA */}
+      <section className="py-16 sm:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+            Ready to get started?
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+            Join BookMe today and experience the easiest way to manage appointments.
+          </p>
+          {!me && !loading && (
+            <Button asChild size="lg" className="gap-2">
+              <Link href="/auth/register">
+                Create Free Account
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Button>
           )}
         </div>
-      </div>
+      </section>
     </main>
   );
 }

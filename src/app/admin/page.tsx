@@ -1,89 +1,104 @@
+import Link from "next/link";
+import { Settings, Users, Shield, Activity } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
 export default function AdminHome() {
     return (
-        <main className="min-h-[calc(100vh-64px)] p-4 sm:p-6 dark:bg-slate-950 bg-white">
-            <div className="max-w-7xl mx-auto">
-                <div className="mb-8">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
-                    <p className="text-slate-400 text-sm sm:text-base">Manage services, providers, and monitor system activity</p>
+        <main className="min-h-screen bg-background">
+            <div className="page-container">
+                {/* Page Header */}
+                <div className="page-header">
+                    <h1 className="page-title">Admin Dashboard</h1>
+                    <p className="page-description">Manage services, providers, and monitor system activity</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                {/* Action Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
                     {/* Services Card */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 sm:p-6 hover:border-slate-700 transition-all group">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                            <div className="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center group-hover:bg-blue-600/30 transition-colors">
-                                <span className="text-lg">⚙️</span>
+                    <Card className="aurora-card-hover group">
+                        <CardContent className="p-4 sm:p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                    <Settings className="w-5 h-5 text-primary" />
+                                </div>
+                                <h2 className="text-lg font-semibold text-foreground">Services</h2>
                             </div>
-                            <h2 className="text-base sm:text-lg font-semibold text-white">Services</h2>
-                        </div>
-                        <p className="text-slate-400 text-xs sm:text-sm mb-3 sm:mb-4">
-                            Create, update, and manage appointment services
-                        </p>
-                        <a
-                            href="/admin/services"
-                            className="inline-block px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium text-xs sm:text-sm transition-colors"
-                        >
-                            Manage Services →
-                        </a>
-                    </div>
+                            <p className="text-muted-foreground text-sm mb-4">
+                                Create, update, and manage appointment services
+                            </p>
+                            <Button asChild size="sm">
+                                <Link href="/admin/services">Manage Services →</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
 
                     {/* Providers Card */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 sm:p-6 hover:border-slate-700 transition-all group">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                            <div className="w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center group-hover:bg-purple-600/30 transition-colors">
-                                <span className="text-lg">👥</span>
+                    <Card className="aurora-card-hover group">
+                        <CardContent className="p-4 sm:p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-accent/15 rounded-lg flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                                    <Users className="w-5 h-5 text-accent" />
+                                </div>
+                                <h2 className="text-lg font-semibold text-foreground">Providers</h2>
                             </div>
-                            <h2 className="text-base sm:text-lg font-semibold text-white">Providers</h2>
-                        </div>
-                        <p className="text-slate-400 text-xs sm:text-sm mb-3 sm:mb-4">
-                            Review and approve provider registrations
-                        </p>
-                        <a
-                            href="/admin/providers"
-                            className="inline-block px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded font-medium text-xs sm:text-sm transition-colors"
-                        >
-                            Approve Providers →
-                        </a>
-                    </div>
+                            <p className="text-muted-foreground text-sm mb-4">
+                                Review and approve provider registrations
+                            </p>
+                            <Button asChild variant="secondary" size="sm">
+                                <Link href="/admin/providers">Approve Providers →</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
 
                     {/* Audit Logs Card */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 sm:p-6 hover:border-slate-700 transition-all group">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                            <div className="w-10 h-10 bg-green-600/20 rounded-lg flex items-center justify-center group-hover:bg-green-600/30 transition-colors">
-                                <span className="text-lg">📋</span>
+                    <Card className="aurora-card-hover group">
+                        <CardContent className="p-4 sm:p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-success/15 rounded-lg flex items-center justify-center group-hover:bg-success/20 transition-colors">
+                                    <Shield className="w-5 h-5 text-success" />
+                                </div>
+                                <h2 className="text-lg font-semibold text-foreground">Audit Logs</h2>
                             </div>
-                            <h2 className="text-base sm:text-lg font-semibold text-white">Audit Logs</h2>
-                        </div>
-                        <p className="text-slate-400 text-xs sm:text-sm mb-3 sm:mb-4">
-                            Monitor all system activity and changes
-                        </p>
-                        <a
-                            href="/admin/audit"
-                            className="inline-block px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-medium text-sm transition-colors"
-                        >
-                            View Logs →
-                        </a>
-                    </div>
+                            <p className="text-muted-foreground text-sm mb-4">
+                                Monitor all system activity and changes
+                            </p>
+                            <Button asChild variant="outline" size="sm">
+                                <Link href="/admin/audit">View Logs →</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 {/* Stats Section */}
-                <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                        <p className="text-slate-400 text-xs sm:text-sm mb-2">API Endpoints</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-blue-400">31</p>
-                    </div>
-                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                        <p className="text-slate-400 text-xs sm:text-sm mb-2">User Roles</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-purple-400">3</p>
-                    </div>
-                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                        <p className="text-slate-400 text-xs sm:text-sm mb-2">Routes</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-green-400">29</p>
-                    </div>
-                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                        <p className="text-slate-400 text-xs sm:text-sm mb-2">Status</p>
-                        <p className="text-lg sm:text-xl font-bold text-white">Active ✓</p>
-                    </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card className="aurora-card">
+                        <CardContent className="p-4 sm:p-6">
+                            <p className="text-muted-foreground text-xs sm:text-sm mb-2">API Endpoints</p>
+                            <p className="text-2xl sm:text-3xl font-bold text-primary">31</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="aurora-card">
+                        <CardContent className="p-4 sm:p-6">
+                            <p className="text-muted-foreground text-xs sm:text-sm mb-2">User Roles</p>
+                            <p className="text-2xl sm:text-3xl font-bold text-accent">3</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="aurora-card">
+                        <CardContent className="p-4 sm:p-6">
+                            <p className="text-muted-foreground text-xs sm:text-sm mb-2">Routes</p>
+                            <p className="text-2xl sm:text-3xl font-bold text-success">29</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="aurora-card">
+                        <CardContent className="p-4 sm:p-6">
+                            <p className="text-muted-foreground text-xs sm:text-sm mb-2">Status</p>
+                            <div className="flex items-center gap-2">
+                                <Activity className="w-5 h-5 text-success" />
+                                <p className="text-lg sm:text-xl font-bold text-foreground">Active</p>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </main>

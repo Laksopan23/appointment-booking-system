@@ -3,11 +3,19 @@
 
 @custom-variant dark (&.dark);
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   TAILWIND V4 THEME CONFIGURATION
+   Maps CSS variables to Tailwind color utilities
+   ═══════════════════════════════════════════════════════════════════════════ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --radius-lg: 0.75rem;
+
+  /* Colors mapped from CSS variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -22,67 +30,215 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   AURORA MINT THEME - Light Mode
+   ═══════════════════════════════════════════════════════════════════════════ */
 :root {
-  --radius: 0.75rem;
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
+  color-scheme: light;
+
+  /* Backgrounds */
+  --background: oklch(0.98 0.01 160);
+  --surface: oklch(1 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.02 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.02 260);
+
+  /* Text */
+  --foreground: oklch(0.15 0.02 260);
+  --muted: oklch(0.96 0.01 160);
+  --muted-foreground: oklch(0.55 0.02 250);
+  --secondary: oklch(0.97 0.01 160);
+  --secondary-foreground: oklch(0.35 0.02 250);
+
+  /* Primary - Mint Teal */
+  --primary: oklch(0.65 0.15 175);
+  --primary-foreground: oklch(1 0 0);
+
+  /* Accent - Cyan */
+  --accent: oklch(0.7 0.15 195);
+  --accent-foreground: oklch(1 0 0);
+
+  /* Status */
+  --destructive: oklch(0.6 0.2 25);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.65 0.2 145);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.75 0.15 75);
+  --warning-foreground: oklch(0.2 0.02 75);
+
+  /* Borders & Inputs */
+  --border: oklch(0.9 0.02 160);
+  --input: oklch(0.9 0.02 160);
+  --ring: oklch(0.65 0.15 175);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   AURORA MINT THEME - Dark Mode
+   ═══════════════════════════════════════════════════════════════════════════ */
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 70% 8%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 70% 8%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 70%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 70% 50%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 18%;
-  --input: 217.2 32.6% 18%;
-  --ring: 224.3 76.3% 48%;
   color-scheme: dark;
+
+  /* Backgrounds */
+  --background: oklch(0.15 0.03 175);
+  --surface: oklch(0.18 0.03 175);
+  --card: oklch(0.2 0.03 175);
+  --card-foreground: oklch(0.95 0.02 175);
+  --popover: oklch(0.2 0.03 175);
+  --popover-foreground: oklch(0.95 0.02 175);
+
+  /* Text */
+  --foreground: oklch(0.95 0.02 175);
+  --muted: oklch(0.22 0.03 175);
+  --muted-foreground: oklch(0.7 0.05 175);
+  --secondary: oklch(0.22 0.03 175);
+  --secondary-foreground: oklch(0.85 0.05 160);
+
+  /* Primary - Mint Teal (brighter) */
+  --primary: oklch(0.75 0.15 175);
+  --primary-foreground: oklch(0.15 0.03 175);
+
+  /* Accent - Cyan (brighter) */
+  --accent: oklch(0.8 0.12 195);
+  --accent-foreground: oklch(0.15 0.03 175);
+
+  /* Status */
+  --destructive: oklch(0.65 0.25 25);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.72 0.17 160);
+  --success-foreground: oklch(0.15 0.03 175);
+  --warning: oklch(0.8 0.14 85);
+  --warning-foreground: oklch(0.15 0.03 175);
+
+  /* Borders & Inputs */
+  --border: oklch(0.25 0.03 175);
+  --input: oklch(0.25 0.03 175);
+  --ring: oklch(0.75 0.15 175);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE LAYER
+   ═══════════════════════════════════════════════════════════════════════════ */
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig"1, "calt"1;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-foreground;
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENT LAYER
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer components {
+
+  /* Card Styles */
+  .aurora-card {
+    @apply bg-card text-card-foreground rounded-xl border border-border shadow-sm;
+  }
+
+  .aurora-card-hover {
+    @apply bg-card text-card-foreground rounded-xl border border-border shadow-sm transition-all duration-200;
+  }
+
+  .aurora-card-hover:hover {
+    @apply shadow-md border-primary/30;
+  }
+
+  /* Surface (navbar, shells) */
+  .aurora-surface {
+    @apply bg-surface border-b border-border;
+  }
+
+  /* Page Container */
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 py-6;
+  }
+
+  @media (min-width: 640px) {
+    .page-container {
+      @apply px-6 py-8;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .page-container {
+      @apply px-8;
+    }
+  }
+
+  /* Page Header */
+  .page-header {
+    @apply mb-8;
+  }
+
+  .page-title {
+    @apply text-2xl font-semibold text-foreground tracking-tight;
+  }
+
+  @media (min-width: 640px) {
+    .page-title {
+      @apply text-3xl;
+    }
+  }
+
+  .page-description {
+    @apply mt-2 text-muted-foreground;
+  }
+
+  /* Status Badges */
+  .badge-success {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-success/15 text-success;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-warning/15 text-warning;
+  }
+
+  .badge-destructive {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-destructive/15 text-destructive;
+  }
+
+  .badge-primary {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/15 text-primary;
+  }
+
+  .badge-accent {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-accent/15 text-accent;
+  }
+
+  .badge-muted {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITIES LAYER
+   ═══════════════════════════════════════════════════════════════════════════ */
 @layer utilities {
   @keyframes fadeIn {
     from {
@@ -118,18 +274,6 @@
     }
   }
 
-  @keyframes pulse-slow {
-
-    0%,
-    100% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0.5;
-    }
-  }
-
   .animate-fadeIn {
     animation: fadeIn 0.6s ease-out;
   }
@@ -140,9 +284,5 @@
 
   .animate-slideDown {
     animation: slideDown 0.5s ease-out;
-  }
-
-  .animation-delay-2000 {
-    animation-delay: 2s;
   }
 }
