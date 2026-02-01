@@ -68,7 +68,7 @@ async function main() {
   const adminId = await generateId("AD");
   const adminPass = await bcrypt.hash("password123", 10);
 
-  const admin = await prisma.user.create({
+  await prisma.user.create({
     data: {
       id: adminId,
       name: "System Administrator",

@@ -70,8 +70,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ booking }, { status: 201 });
-  } catch (e: any) {
-    if (e?.code === "P2002") {
+  } catch (e) {
+    const error = e as { code?: string };
+    if (error?.code === "P2002") {
       // Unique constraint violation
       return NextResponse.json(
         { error: "Slot already booked" },

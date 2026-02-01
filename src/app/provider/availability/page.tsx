@@ -79,6 +79,7 @@ export default function ProviderAvailabilityPage() {
         if (date && providerProfileId) {
             loadBlocks(date);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [date, providerProfileId]);
 
     async function createAvailability() {

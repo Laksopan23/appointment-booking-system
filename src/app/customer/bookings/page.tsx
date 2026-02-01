@@ -36,7 +36,7 @@ export default function CustomerBookingsPage() {
             setLoading(true);
             const res = await api<{ bookings: Booking[] }>("/api/bookings");
             setBookings(res.bookings);
-        } catch (e: any) {
+        } catch (e) {
             toastError(e, "Failed to load bookings");
         } finally {
             setLoading(false);

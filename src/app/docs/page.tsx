@@ -13,7 +13,7 @@ export default function DocsPage() {
     useEffect(() => {
         // Suppress the swagger-ui-react UNSAFE_componentWillReceiveProps warning
         const originalError = console.error;
-        console.error = function (...args: any[]) {
+        console.error = function (...args: unknown[]) {
             if (
                 typeof args[0] === "string" &&
                 args[0].includes("UNSAFE_componentWillReceiveProps")
