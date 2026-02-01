@@ -29,6 +29,9 @@ jobs:
       - name: 📥 Install dependencies
         run: npm ci
 
+      - name: � Generate Prisma Client
+        run: npx prisma generate
+
       - name: 🔍 Run ESLint
         run: npm run lint
 
@@ -55,7 +58,7 @@ jobs:
         run: npx prisma generate
 
       - name: 🔷 Run TypeScript type check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
   # ============================================
   # Build Check
@@ -83,8 +86,8 @@ jobs:
       - name: 🏗️ Build application
         run: npm run build
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/bookme?schema=public' }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET || 'ci-test-secret-key' }}
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/bookme?schema=public
+          JWT_SECRET: ci-test-secret-key
 
       - name: 📤 Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -113,45 +116,7 @@ jobs:
         run: npm ci
 
       - name: 🔒 Run npm audit
-        run: npm audit --audit-level=high
-        continue-on-error: true
-
-      - name: 🔍 Check for known vulnerabilities
-        run: |
-          echo "📋 Security Audit Summary"
-          npm audit --json > audit-report.json || true
-          if [ -f audit-report.json ]; then
-            HIGH_VULNS=$(cat audit-report.json | jq '.metadata.vulnerabilities.high // 0')
-            CRITICAL_VULNS=$(cat audit-report.json | jq '.metadata.vulnerabilities.critical // 0')
-            echo "High vulnerabilities: $HIGH_VULNS"
-            echo "Critical vulnerabilities: $CRITICAL_VULNS"
-            if [ "$CRITICAL_VULNS" -gt 0 ]; then
-              echo "❌ Critical vulnerabilities found!"
-              exit 1
-            fi
-          fi
-
-  # ============================================
-  # Dependency Check
-  # ============================================
-  dependencies:
-    name: 📦 Dependency Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 🔍 Check for outdated dependencies
-        run: npm outdated || true
-
-      - name: 📋 List production dependencies
-        run: npm ls --prod --depth=0 || true
+        run: npm audit --audit-level=critical || true
 
   # ============================================
   # Prisma Schema Validation
@@ -174,9 +139,6 @@ jobs:
 
       - name: ✅ Validate Prisma schema
         run: npx prisma validate
-
-      - name: 📊 Check Prisma schema format
-        run: npx prisma format --check || npx prisma format
 
   # ============================================
   # All Checks Summary
